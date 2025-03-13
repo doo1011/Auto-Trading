@@ -2,12 +2,18 @@ import plotly.graph_objects as go
 import pandas as pd
 
 from src.module.yfinance_api import get_all_price
+from src.module.upbit_rest_api import get_minute_candle_chart
 from src.module.trading_strategy import stochastic_slow_k_trade_decision, sma_trade_decision
+from src.module.util import dict_list_to_dataframe
 
 
 class Backtesting:
-    def __init__(self, market_code):
-        self.prices = get_all_price(market_code)
+    def __init__(self, market_code, interval=""):
+        if interval == "5-minute":
+            words = interval.split('-')
+            self.prices = dict_list_to_dataframe(get_minute_candle_chart(market_code, words[0]))
+        else:
+            self.prices = get_all_price(market_code)
 
     def add_stochastic(self, n, m, t):
         self.prices["Low_N"] = self.prices["Low"].rolling(window=n).min()
@@ -41,7 +47,7 @@ class Backtesting:
                             mode="lines+markers",
                             line=dict(color="yellow", width=2, dash="dash"),
                             marker=dict(size=8, color="purple"),
-                            name=f"{point1[0].strftime("%Y-%m-%d")} ~ {point2[0].strftime("%Y-%m-%d")} {profit}"
+                            name=f"{point1[0].strftime("%Y-%m-%d %H:%M:%S")} ~ {point2[0].strftime("%Y-%m-%d %H:%M:%S")} {profit}"
                         ))
                         figure.add_annotation(
                             x=pd.Timestamp(point1[0]) + (pd.Timestamp(point2[0]) - pd.Timestamp(point1[0])) / 2,  # 📍 중간 지점 (X 좌표)
@@ -56,9 +62,7 @@ class Backtesting:
 
 
 
-
-
 if __name__ == "__main__":
-    b = Backtesting("BTC-KRW")
+    b = Backtesting("KRW-BTC", "5-minute")
     b.add_stochastic(14, 3, 3)
     print("Done")

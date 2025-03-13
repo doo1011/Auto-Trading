@@ -3,9 +3,13 @@ from plotly.subplots import make_subplots
 
 from src.module.backtesting import Backtesting
 
-market_code = "BTC-KRW"
+# market_code = "BTC-KRW"
+market_code = "KRW-BTC"
 
-backtesting = Backtesting(market_code)
+backtesting = Backtesting(market_code, "5-minute")
+
+backtesting.prices.dropna(inplace=True)
+
 backtesting.add_stochastic(20, 7, 3)
 backtesting.add_sma(5)
 
