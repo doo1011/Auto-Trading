@@ -65,7 +65,6 @@ async def upbit_ws_client():
                 period = datetime.datetime.now()
 
                 data = json.loads(message)
-                logging.info(data)
 
                 # 5초마다 종목 정보 재 조회 후 추가된 종목이 있으면 웹소켓 다시 시작
                 if (period.second % 5) == 0 and seconds != period.second:

@@ -13,7 +13,7 @@ queue = asyncio.Queue()
 async def producer():
     async for data in upbit_ws_client():
         await queue.put(data)
-        logging.info(f"📥 큐에 추가됨: {data}")
+        logging.info(f"📥 큐에 추가됨: {data["cd"]} 현재가 : {data["tp"]}")
 
 async def consumer(indicator_calculator):
     while True:
@@ -23,13 +23,13 @@ async def consumer(indicator_calculator):
             sma = indicator_calculator.cal_sma(data["cd"], data["tp"], 5)
             slow_k_decision = stochastic_slow_k_trade_decision(slow_k)
             sma_decision = sma_trade_decision(sma, data["tp"], data["op"])
+            final_decision = "Will not trade"
             if slow_k_decision and sma_decision:
                 if slow_k_decision == "BUY" and sma_decision == "BUY":
                     final_decision = "BUY"
                 if slow_k_decision == "SELL" and sma_decision == "SELL":
                     final_decision = "SELL"
-            logging.info(final_decision)
-            logging.info(f"✅ 처리된 데이터: {data}")
+            logging.info(f"✅ 처리된 데이터: {data["cd"]} Slow %K : {slow_k} 5일 이동평균 : {sma} 매매 : {final_decision}")
 
         queue.task_done()
 
