@@ -19,7 +19,6 @@ class CalIndicator:
 
     def cal_stochastic_slow(self, stochastic_type, market_code, today_price:float, n, m, t=0):
         try:
-            logging.info(f"{market_code} Cal Stochastic Slow %D")
             prices = [i["trade_price"] for i in self.prices[market_code]]
             prices.insert(0, today_price)
             fast_k_list = list()
@@ -48,7 +47,6 @@ class CalIndicator:
 
     def cal_sma(self, market_code, today_price:float, n):
         try:
-            logging.info(f"{market_code} Cal SMA")
             prices = [i["trade_price"] for i in self.prices[market_code]]
             prices.insert(0, today_price)
             return mean(prices[0 : n])
