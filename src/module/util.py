@@ -1,6 +1,7 @@
 import logging
 import requests
 import time
+import pandas as pd
 
 
 def set_loglevel(level):
@@ -99,3 +100,25 @@ def send_request(type, url, param, header):
         logging.error("Exception Raised In Sending Request!")
         logging.error(e)
         raise
+
+def dict_list_to_dataframe(data:list):
+    sorted_data = sorted(data, key=lambda x: x["timestamp"])
+    df = pd.DataFrame(sorted_data)
+
+    df = df.rename(columns={
+        "candle_date_time_kst": "Date",
+        "opening_price": "Open",
+        "high_price": "High",
+        "low_price": "Low",
+        "trade_price": "Close",
+        "candle_acc_trade_volume": "Volume"
+    })
+
+    # 🔹 Date 컬럼을 datetime 타입으로 변환 후 인덱스로 설정
+    df["Date"] = pd.to_datetime(df["Date"])
+    df.set_index("Date", inplace=True)
+
+    df = df[~df.index.duplicated(keep='last')]
+
+    return df
+
