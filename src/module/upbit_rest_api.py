@@ -1,4 +1,5 @@
 import logging
+import time
 
 import src.resources.config as cfg
 from src.module.util import send_request
@@ -60,12 +61,45 @@ def get_daily_candle_chart(market, to_date, data_count, currency):
         logging.error(e)
         raise
 
+def get_minute_candle_chart(market, unit, to_date=None, data_count=200):
+    try:
+        url = f"/v1/candles/minutes/{unit}"
+
+        for i in range(43):
+            if i == 0:
+                querystring = {
+                    "market": market,
+                    "to": to_date,
+                    "count": data_count
+                }
+                response = send_request("GET", cfg.UPBIT_URL + url, querystring, "")
+                res_json = response.json()
+                data = res_json[:len(res_json) - 1]
+            else:
+                querystring = {
+                    "market": market,
+                    "to": data[len(data) - 1]["candle_date_time_kst"],
+                    "count": 200
+                }
+                response = send_request("GET", cfg.UPBIT_URL + url, querystring, "")
+                res_json = response.json()
+
+                data += res_json[:len(res_json) - 1]
+            time.sleep(0.1)
+
+        return data
+
+    except Exception as e:
+        logging.error("Exception Raised In Getting Candle Chart!")
+        logging.error(e)
+        raise
+
 
 if __name__ == "__main__":
     import datetime
 
     now = datetime.datetime.now()
     print(now.strftime("%Y-%m-%d %H:%M:%S"))
-    price = get_daily_candle_chart("KRW-BTC", now.strftime("%Y-%m-%d %H:%M:%S"), 100, "KRW")
+    price = get_minute_candle_chart("KRW-BTC", 5, now.strftime("%Y-%m-%d %H:%M:%S"), 200)
     print(price)
 
